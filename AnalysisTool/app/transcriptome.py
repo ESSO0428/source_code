@@ -168,3 +168,81 @@ class AnalayGeneIsoForm(object):
             return data
         else:
             return self.dictIsoFormCountGeneDistribution
+
+class StaticAnnotationGene(object):
+    """
+        StaticAnnotationGene:
+        ---
+            - static annotation gene
+            - format results
+            - return: \n
+                - dict (key: annotation, value: gene_count)
+                - or DataFrame (annotation, gene_count)
+    """
+    def __init__(self, data: DataFrame) -> None:
+        self.data = data
+        self.dictAnnotationGene = dict()
+    @property
+    def Static(self) -> Dict:
+        """
+            StaticAnnotationGene:
+            ---
+                - static annotation gene
+                - output: 
+                    - dict (key: annotation, value: gene_count)
+            ---
+
+            example
+            ---
+                >>> data
+                    gene_id	annotation
+                0	PggD13791_c37_g1	XM_020715060.1 PREDICTED: Phalaenopsis equestr...
+                1	PggD3380_c11_g1	XM_020724321.1 PREDICTED: Phalaenopsis equestr...
+                2	PggD7976_c8_g1	XM_020720713.1 PREDICTED: Phalaenopsis equestr...
+                ...	...	...
+                87959 rows × 2 columns
+                >>> objStaticAnnotationGene = StaticAnnotationGene(data)
+                >>> objStaticAnnotationGene.Static
+                {'XM_020715060.1 PREDICTED: Phalaenopsis equestris midasin-like (LOC110017904), mRNA': 2,
+                'XM_020724321.1 PREDICTED: Phalaenopsis equestris auxin transport protein BIG (LOC110024389), mRNA': 2,
+                'XM_020720713.1 PREDICTED: Phalaenopsis equestris uncharacterized LOC110021972 (LOC110021972), transcript variant X1, mRNA': 1,
+                ...}
+        """
+        for index, row in self.data.iterrows():
+            annotation = row['annotation']
+            if annotation not in self.dictAnnotationGene:
+                self.dictAnnotationGene[annotation] = 0
+            self.dictAnnotationGene[annotation] += 1
+        return self.dictAnnotationGene
+    @property
+    def to_DataFrame(self):
+        """
+            FormatResults to DataFrame:
+            ---
+                - After `Static`
+                - output: DataFrame (annotation, gene_count)
+            ---
+
+            example
+            ---
+                >>> objStaticAnnotationGene = StaticAnnotationGene(data)
+                >>> objStaticAnnotationGene.Static
+                ...
+                >>> objStaticAnnotationGene.to_DataFrame
+                    annotation	gene_count
+                0	XM_020715060.1 PREDICTED: Phalaenopsis equestr...	2
+                1	XM_020724321.1 PREDICTED: Phalaenopsis equestr...	2
+                2	XM_020720713.1 PREDICTED: Phalaenopsis equestr...	1
+                ...	...	...
+                30511 rows × 2 columns
+
+
+        """
+        data = pd.DataFrame(
+            {
+                'annotation' : self.dictAnnotationGene.keys(),
+                'gene_count' : self.dictAnnotationGene.values()
+            }
+        )
+        return data
+
