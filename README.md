@@ -1,9 +1,7 @@
 ---
-
 title: My Analysis Tools
-author: "Andy6"
+author: Andy6
 date: 230922
-
 ---
 
 # My Analysis Tools
