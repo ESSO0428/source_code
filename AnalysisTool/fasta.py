@@ -17,7 +17,7 @@ from pandas.core.frame import DataFrame
 import pandas as pd
 from .app import *
 
-def readAsDict(fasta_file: str, force_upper: bool = True ) -> Dict[str, str]:
+def readAsDict(fasta_file: str, force_upper: bool = True, ignore_seq_info: bool = True) -> Dict[str, str]:
     """
     read fasta into dict :
         reference : https://www.biostars.org/p/710/#1414  \n
@@ -28,13 +28,21 @@ def readAsDict(fasta_file: str, force_upper: bool = True ) -> Dict[str, str]:
         >>> dictGenome
         {'L01': 'ATCG....', ... }
 
-        p.s. : will remove detail 
-            ex: >L01 chr1 -> L01
+        p.s. : will remove detail (default)
+            ex: >L01 chr1 -> L01 \n
+
+            set `ignore_seq_info` to `False` to keep detail \n
+            ex: >L01 chr1 -> L01 chr1
     ---
         args : 
             fasta_file : fasta file path
             force_upper : true/false (force to upper case)
                 atcg -> ATCG
+            ignore_seq_info : true/false (remove detail)
+                default : true
+                    ex: >L01 chr1 -> L01
+                set `false` will keep detail
+                    ex: >L01 chr1 -> L01 chr1
     """
 
     SeqDict = {}
@@ -43,7 +51,8 @@ def readAsDict(fasta_file: str, force_upper: bool = True ) -> Dict[str, str]:
             #SeqDict[record.head] = \
             # new : remove detail ex: >L01 chr1 -> >L01
             chr=record.head
-            chr=chr.split(' ')[0]
+            if ignore_seq_info:
+                chr=chr.split(' ')[0]
             SeqDict[chr] = \
                 record.sequence.upper() if force_upper else record.sequence
     return SeqDict
@@ -63,7 +72,7 @@ def reverse_complement(dna):
     return ''.join([complement.get(base, base) for base in dna[::-1]])
 
 # 230907 add new def for process dict of fasta (for degradome project)
-def convert_dict_fasta_sequence(dictFasta: Dict[str, str], how: str = "length") -> Dict[str, int]:
+def convert_dict_fasta_sequence(dictFasta: Dict[str, str], how: str = "length") -> Dict[str, int] | Dict[str, str]:
     """
     calculate string length of each items in dict :
         input : dict of fasta (or other string)
@@ -79,6 +88,8 @@ def convert_dict_fasta_sequence(dictFasta: Dict[str, str], how: str = "length") 
     """
     if how == "length":
         return {key: len(value) for key, value in dictFasta.items()}
+    else:
+        return dictFasta
     
 
 
