@@ -4,7 +4,7 @@
 """
 
 from __future__ import annotations
-from pandas.core.frame import DataFrame
+from pandas.core.frame import DataFrame, Series
 import pandas as pd
 from   matplotlib import pyplot as plt
 import seaborn as sns
@@ -18,14 +18,14 @@ class GetGeneIsoformCount(object):
             - get `gene_id` and `isoform_count` from `transcript_id` \n
             - input: `DataFrame` (include transcript_id) \n
             - example: \n
-                >>> pdfTranscriptome
+                >>> data
                     transcript_id
                 0	PggD10000_c0_g1_i1
                 1	PggD10002_c0_g1_i1
                 2	PggD10002_c0_g1_i2
                 ...	...
                 257743 rows × 1 columns
-                >>> objGetGeneIsoformCount = GetGeneIsoformCount(pdfTranscriptome)
+                >>> objGetGeneIsoformCount = GetGeneIsoformCount(data)
                 >>> objGetGeneIsoformCount.CountGeneIsoform()
                 {'PggD10000_c0_g1': 2,
                 'PggD10002_c0_g1': 4,
@@ -45,18 +45,18 @@ class GetGeneIsoformCount(object):
                 ...	...	...
                 221328 rows × 2 columns
     """
-    def __init__(self, pdfTranscriptome: DataFrame):
+    def __init__(self, data: DataFrame):
         """
             GetGeneIsoformCount:
                 - input: DataFrame (include transcript_id) \n
                 - useful attributes :
-                    self.pdfTranscriptome : 
+                    self.data_add_gene_id : 
                         DataFrame (include transcript_id and gene_id)
         """
-        self.dictGeneIsoFormCount = dict()
-        self.pdfTranscriptome = pdfTranscriptome
-        self.pdfTranscriptome['gene_id'] = self.pdfTranscriptome.apply(lambda row: self._get_gene_id(row), axis=1)
-    def _get_gene_id(self, row: pd.Series) -> List:
+        self.dictGeneIsoFormCount         = dict()
+        self.data_add_gene_id             = data
+        self.data_add_gene_id['gene_id']  = self.data_add_gene_id.apply(lambda row: self._get_gene_id(row), axis=1)
+    def _get_gene_id(self, row: Series) -> List:
         """
             Get gene_id from transcript_id
         """
@@ -68,17 +68,17 @@ class GetGeneIsoformCount(object):
             Count gene isoform
             input : DataFrame (include gene_id)
         """
-        for index, row in self.pdfTranscriptome.iterrows():
+        for index, row in self.data_add_gene_id.iterrows():
             gene_id = row['gene_id']
             if gene_id not in self.dictGeneIsoFormCount:
                 self.dictGeneIsoFormCount[gene_id] = 0
             self.dictGeneIsoFormCount[gene_id] += 1
         return self.dictGeneIsoFormCount
-    def _add_isoform_count(self, row: pd.Series) -> List:
+    def _add_isoform_count(self, row: Series) -> List:
         """
             Get gene isofrom
             input :
-                row : pd.Series (include gene_id)
+                row : Series (include gene_id)
             output :
                 row : list (list of gene isoform counts for each gene_id)
         """
@@ -93,24 +93,36 @@ class GetGeneIsoformCount(object):
                     `default` : return all columns  \n
                     `gene_and_isoform_count` : return gene_id and isoform_count
         """
-        self.pdfTranscriptome['isoform_count'] = self.pdfTranscriptome.apply(
+        self.data_add_gene_id['isoform_count'] = self.data_add_gene_id.apply(
             lambda row: self._add_isoform_count(row),
             axis=1
         )
         if how != "gene_and_isoform_count":
-            Result = self.pdfTranscriptome
+            Result = self.data_add_gene_id
         else:
-            Result = self.pdfTranscriptome[['gene_id', 'isoform_count']].drop_duplicates()
+            Result = self.data_add_gene_id[['gene_id', 'isoform_count']].drop_duplicates()
         return Result
 
 class AnalayGeneIsoForm(object):
-    def __init__(self, pdfTranscriptomeGeneLevel: DataFrame) -> None:
-        self.pdfTranscriptomeGeneLevel = pdfTranscriptomeGeneLevel
+    """
+        AnalayGeneIsoForm:
+            Analay `genes distribution` of `difference isoform count`
+        ---
+        - input: DataFrame (include gene_id and isoform_count)
+        - output:  `gene_id` and `isoform_count` to dict or DataFrame (GeneIsoFormCount)
+    """
+    def __init__(self, data: DataFrame) -> None:
+        self.data = data
         self.dictIsoFormCountGeneDistribution = dict()
     @property
     def GetIsoFormCountGeneDistribution(self) -> Dict:
         """
             GetIsoFormCountGeneDistribution:
+            ---
+                input:
+            ---
+                    DataFrame (include gene_id and isoform_count)
+
             ---
                 output: 
             ---
@@ -119,13 +131,13 @@ class AnalayGeneIsoForm(object):
             ---
                 example:
             ---
-                >>> pdfTranscriptomeGeneLevel
+                >>> data
                     gene_id	isoform_count
                 171509	PggD4975_c16_g1	24
                 89481	PggD14842_c13_g1	22
                 ...	...	...
                 221328 rows × 2 columns
-                >>> objAnalayGeneIsoForm = AnalayGeneIsoForm(pdfTranscriptomeGeneLevel)
+                >>> objAnalayGeneIsoForm = AnalayGeneIsoForm(data)
                 >>> objAnalayGeneIsoForm.GetIsoFormCountGeneDistribution
                 {24: 2,
                 22: 2,
@@ -141,7 +153,7 @@ class AnalayGeneIsoForm(object):
                 22: 2,
                 ...}
         """
-        for index, row in self.pdfTranscriptomeGeneLevel.iterrows():
+        for index, row in self.data.iterrows():
             isoform_count = row['isoform_count']
             if isoform_count not in self.dictIsoFormCountGeneDistribution:
                 self.dictIsoFormCountGeneDistribution[isoform_count] = 0
@@ -173,21 +185,28 @@ class StaticAnnotationGene(object):
     """
         StaticAnnotationGene:
         ---
-            - static annotation gene
-            - format results
-            - return: \n
-                - dict (key: annotation, value: gene_count)
-                - or DataFrame (annotation, gene_count)
+            static annotation gene
+        ---
+                `input`: 
+        ---
+                    DataFrame (include gene_id and annotation)
+
+        ---
+                `format` and `return results`:
+        ---
+                    dict (key: annotation, value: gene_count; Static) \n
+                    or DataFrame (annotation, gene_count; to_DataFrame)
     """
     def __init__(self, data: DataFrame) -> None:
         self.data = data
         self.dictAnnotationGene = dict()
     @property
-    def Static(self) -> Dict:
+    def Static(self) -> Dict[str, int]:
         """
             StaticAnnotationGene:
             ---
                 - static annotation gene
+                - input: DataFrame (include gene_id and annotation)
                 - output: 
                     - dict (key: annotation, value: gene_count)
             ---
