@@ -9,9 +9,13 @@ and I (Andy6) `impove and add some functions``
     - main : process precursor miRNA sequence
     - input : RNAfold data
     - output : good structure miRNA
+
+`utils` for some useful functions
 """
 
 from . import fasta
 from . import template
 from . import VFold
+
+from . import utils
 
