@@ -44,5 +44,6 @@ def tee(data, file: SupportsWrite[str], end='\n'):
     :param end: The character(s) to append at the end. Default is newline.
     """
     print(data, end=end)  # prints to console
-    print(data, end=end, file=file)  # writes to file
+    if file:
+        print(data, end=end, file=file)  # writes to file
 
