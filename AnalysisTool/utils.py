@@ -2,6 +2,7 @@
     Python utils for the data analysis in `AnalysisTool`
 """
 
+from typing import Protocol, TypeVar
 
 def iter_status(iterable, start=0):
     """Pass through all values from the given iterable, starting with index 'start' (default 0).
@@ -27,4 +28,21 @@ def iter_status(iterable, start=0):
         index += 1
         last_item = item
     yield index, False, last_item
+
+
+_T_contra = TypeVar("_T_contra", contravariant=True)
+# stable
+class SupportsWrite(Protocol[_T_contra]):
+    def write(self, __s: _T_contra) -> object: ...
+
+
+def tee(data, file: SupportsWrite[str], end='\n'):
+    """
+    Prints and writes to a file at the same time.
+    :param data: The data to be printed and written to the file.
+    :param file: The file object to which the data should be written.
+    :param end: The character(s) to append at the end. Default is newline.
+    """
+    print(data, end=end)  # prints to console
+    print(data, end=end, file=file)  # writes to file
 
