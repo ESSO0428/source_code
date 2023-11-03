@@ -2,7 +2,7 @@
     Python utils for the data analysis in `AnalysisTool`
 """
 
-from typing import Protocol, TypeVar
+from typing import Optional, Protocol, TypeVar
 
 def iter_status(iterable, start=0):
     """Pass through all values from the given iterable, starting with index 'start' (default 0).
@@ -36,7 +36,7 @@ class SupportsWrite(Protocol[_T_contra]):
     def write(self, __s: _T_contra) -> object: ...
 
 
-def tee(data, file: SupportsWrite[str] | None, end='\n'):
+def tee(data, file: Optional[SupportsWrite[str]] = None, end='\n'):
     """
     Prints and writes to a file at the same time.
     :param data: The data to be printed and written to the file.
