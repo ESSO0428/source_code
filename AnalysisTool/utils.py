@@ -36,7 +36,7 @@ class SupportsWrite(Protocol[_T_contra]):
     def write(self, __s: _T_contra) -> object: ...
 
 
-def tee(data, file: SupportsWrite[str], end='\n'):
+def tee(data, file: SupportsWrite[str] | None, end='\n'):
     """
     Prints and writes to a file at the same time.
     :param data: The data to be printed and written to the file.
