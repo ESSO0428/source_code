@@ -17,7 +17,8 @@ class GetGeneIsoformCount(object):
             ---
             - get `gene_id` and `isoform_count` from `transcript_id` \n
             - input: `DataFrame` (include transcript_id) \n
-            - example: \n
+            - p.s. if dataframe include `gene_id`, set `gene_id_include` to `True` for `avoid` use `transcript_id convert gene_id`\n
+            - example (gene_id_include=False): \n
                 >>> data
                     transcript_id
                 0	PggD10000_c0_g1_i1
@@ -25,7 +26,7 @@ class GetGeneIsoformCount(object):
                 2	PggD10002_c0_g1_i2
                 ...	...
                 257743 rows × 1 columns
-                >>> objGetGeneIsoformCount = GetGeneIsoformCount(data)
+                >>> objGetGeneIsoformCount = GetGeneIsoformCount(data=data)
                 >>> objGetGeneIsoformCount.CountGeneIsoform()
                 {'PggD10000_c0_g1': 2,
                 'PggD10002_c0_g1': 4,
@@ -45,7 +46,7 @@ class GetGeneIsoformCount(object):
                 ...	...	...
                 221328 rows × 2 columns
     """
-    def __init__(self, data: DataFrame):
+    def __init__(self, data: DataFrame, gene_id_include: bool = False) -> None:
         """
             GetGeneIsoformCount:
                 - input: DataFrame (include transcript_id) \n
@@ -55,7 +56,10 @@ class GetGeneIsoformCount(object):
         """
         self.dictGeneIsoFormCount         = dict()
         self.data_add_gene_id             = data
-        self.data_add_gene_id['gene_id']  = self.data_add_gene_id.apply(lambda row: self._get_gene_id(row), axis=1)
+        if gene_id_include:
+            pass
+        else:
+            self.data_add_gene_id['gene_id']  = self.data_add_gene_id.apply(lambda row: self._get_gene_id(row), axis=1)
     def _get_gene_id(self, row: Series) -> List:
         """
             Get gene_id from transcript_id
